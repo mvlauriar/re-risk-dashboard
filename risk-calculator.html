@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Risk Score Calculator</title>
+    <!-- Load React, ReactDOM, and Recharts from CDN -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            height: 100vh; 
+            font-family: Arial, sans-serif;
+        }
+        /* Tailwind-like utility classes */
+        .bg-white { background-color: white; }
+        .p-6 { padding: 24px; }
+        .rounded-lg { border-radius: 8px; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .border { border: 1px solid; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .text-2xl { font-size: 1.5rem; }
+        .font-bold { font-weight: 700; }
+        .text-gray-800 { color: #1f2937; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-gray-600 { color: #4b5563; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .gap-6 { gap: 1.5rem; }
+        .lg\:col-span-1 { grid-column: span 1 / span 1; }
+        .lg\:col-span-2 { grid-column: span 2 / span 2; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .p-4 { padding: 1rem; }
+        .font-semibold { font-weight: 600; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .w-full { width: 100%; }
+        .p-2 { padding: 0.5rem; }
+        .border-rounded { border-radius: 0.375rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .block { display: block; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .text-xs { font-size: 0.75rem; }
+        .font-medium { font-weight: 500; }
+        .mt-4 { margin-top: 1rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .bg-gray-800 { background-color: #1f2937; }
+        .text-white { color: white; }
+        .rounded-md { border-radius: 0.375rem; }
+        .h-80 { height: 20rem; }
+        .items-center { align-items: center; }
+        .ml-auto { margin-left: auto; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-gray-500 { color: #6b7280; }
+        .p-3 { padding: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .font-medium { font-weight: 500; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .flex { display: flex; }
+        .items-start { align-items: flex-start; }
+        .mr-2 { margin-right: 0.5rem; }
+        .text-blue-600 { color: #2563eb; }
+        
+        /* For larger screens */
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        
+        /* Additional classes for risk colors */
+        .text-red-600 { color: #dc2626; }
+        .text-green-600 { color: #16a34a; }
+        .text-orange-500 { color: #f97316; }
+        .text-yellow-500 { color: #eab308; }
+        
+        /* Custom styles for the range inputs */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d7dcdf;
+            outline: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #1f2937;
+            cursor: pointer;
+            border: 0;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #1f2937;
+            cursor: pointer;
+            border: 0;
+        }
+        
+        /* Border and spacing classes */
+        .border-b { border-bottom: 1px solid #e5e7eb; }
+        .pb-2 { padding-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div id="root" style="width: 100%; height: 100%;"></div>
+    
+    <script type="text/babel">
+        const RiskRadarCalculator = () => {
+          const [selectedMetro, setSelectedMetro] = React.useState("Los Angeles, CA");
+          const [weighting, setWeighting] = React.useState({
+            affordability: 25,
+            climate: 25,
+            liquidity: 25,
+            costTrajectories: 25
+          });
+          
+          // Market data with all risk factors
+          const marketData = [
+            { 
+              metro: "Los Angeles, CA", 
+              affordabilityRisk: 48, 
+              climateRisk: 75, 
+              marketLiquidityRisk: 61, 
+              costTrajectoriesRisk: 84, 
+              compositeRisk: 67, 
+              riskCategory: "High",
+              propertyTaxChange: 8.5,
+              insurancePremiumChange: 12.0
+            },
+            { 
+              metro: "Austin, TX", 
+              affordabilityRisk: 55, 
+              climateRisk: 41, 
+              marketLiquidityRisk: 100, 
+              costTrajectoriesRisk: 69, 
+              compositeRisk: 66, 
+              riskCategory: "High",
+              propertyTaxChange: 7.8,
+              insurancePremiumChange: 10.5
+            },
+            { 
+              metro: "San Francisco, CA", 
+              affordabilityRisk: 38, 
+              climateRisk: 73, 
+              marketLiquidityRisk: 50, 
+              costTrajectoriesRisk: 100, 
+              compositeRisk: 65, 
+              riskCategory: "High",
+              propertyTaxChange: 9.2,
+              insurancePremiumChange: 13.5
+            },
+            { 
+              metro: "Denver, CO", 
+              affordabilityRisk: 37, 
+              climateRisk: 42, 
+              marketLiquidityRisk: 55, 
+              costTrajectoriesRisk: 50, 
+              compositeRisk: 46, 
+              riskCategory: "Moderate",
+              propertyTaxChange: 6.8,
+              insurancePremiumChange: 9.0
+            },
+            { 
+              metro: "Dallas, TX", 
+              affordabilityRisk: 42, 
+              climateRisk: 27, 
+              marketLiquidityRisk: 66, 
+              costTrajectoriesRisk: 41, 
+              compositeRisk: 44, 
+              riskCategory: "Moderate",
+              propertyTaxChange: 6.1,
+              insurancePremiumChange: 8.5
+            },
+            { 
+              metro: "Miami, FL", 
+              affordabilityRisk: 69, 
+              climateRisk: 51, 
+              marketLiquidityRisk: 17, 
+              costTrajectoriesRisk: 27, 
+              compositeRisk: 41, 
+              riskCategory: "Moderate",
+              propertyTaxChange: 5.0,
+              insurancePremiumChange: 8.0
+            },
+            { 
+              metro: "New York, NY", 
+              affordabilityRisk: 42, 
+              climateRisk: 38, 
+              marketLiquidityRisk: 56, 
+              costTrajectoriesRisk: 10, 
+              compositeRisk: 37, 
+              riskCategory: "Moderate",
+              propertyTaxChange: 4.2,
+              insurancePremiumChange: 6.5
+            },
+            { 
+              metro: "Atlanta, GA", 
+              affordabilityRisk: 41, 
+              climateRisk: 32, 
+              marketLiquidityRisk: 62, 
+              costTrajectoriesRisk: 10, 
+              compositeRisk: 36, 
+              riskCategory: "Moderate",
+              propertyTaxChange: 4.5,
+              insurancePremiumChange: 6.0
+            },
+            { 
+              metro: "Boston, MA", 
+              affordabilityRisk: 36, 
+              climateRisk: 32, 
+              marketLiquidityRisk: 72, 
+              costTrajectoriesRisk: 0, 
+              compositeRisk: 35, 
+              riskCategory: "Moderate",
+              propertyTaxChange: 3.8,
+              insurancePremiumChange: 5.5
+            },
+            { 
+              metro: "Chicago, IL", 
+              affordabilityRisk: 33, 
+              climateRisk: 19, 
+              marketLiquidityRisk: 40, 
+              costTrajectoriesRisk: 23, 
+              compositeRisk: 29, 
+              riskCategory: "Low",
+              propertyTaxChange: 5.2,
+              insurancePremiumChange: 7.0
+            }
+          ];
+          
+          // Get the selected market data
+          const selectedMarket = marketData.find(market => market.metro === selectedMetro);
+          
+          // Calculate weighted composite risk score
+          const calculateWeightedRisk = () => {
+            const totalWeight = Object.values(weighting).reduce((sum, weight) => sum + weight, 0);
+            
+            if (totalWeight === 0) return 0;
+            
+            const normalizedWeights = {
+              affordability: weighting.affordability / totalWeight,
+              climate: weighting.climate / totalWeight,
+              liquidity: weighting.liquidity / totalWeight,
+              costTrajectories: weighting.costTrajectories / totalWeight
+            };
+            
+            return Math.round(
+              selectedMarket.affordabilityRisk * normalizedWeights.affordability +
+              selectedMarket.climateRisk * normalizedWeights.climate +
+              selectedMarket.marketLiquidityRisk * normalizedWeights.liquidity +
+              selectedMarket.costTrajectoriesRisk * normalizedWeights.costTrajectories
+            );
+          };
+
+          // Prepare data for radar chart
+          const prepareRadarData = () => {
+            return [
+              { subject: 'Affordability', A: selectedMarket.affordabilityRisk, fullMark: 100 },
+              { subject: 'Climate', A: selectedMarket.climateRisk, fullMark: 100 },
+              { subject: 'Market Liquidity', A: selectedMarket.marketLiquidityRisk, fullMark: 100 },
+              { subject: 'Cost Trajectories', A: selectedMarket.costTrajectoriesRisk, fullMark: 100 },
+              { subject: 'Composite Risk', A: calculateWeightedRisk(), fullMark: 100 }
+            ];
+          };
+          
+          // Get color based on risk score
+          const getRiskColor = (score) => {
+            if (score >= 80) return '#b91c1c'; // Critical (red-800)
+            if (score >= 60) return '#dc2626'; // High (red-600)
+            if (score >= 40) return '#f97316'; // Moderate (orange-500)
+            if (score >= 20) return '#eab308'; // Low (yellow-500)
+            return '#16a34a'; // Minimal (green-600)
+          };
+          
+          // Determine risk category based on score
+          const getRiskCategory = (score) => {
+            if (score >= 80) return 'Critical';
+            if (score >= 60) return 'High';
+            if (score >= 40) return 'Moderate';
+            if (score >= 20) return 'Low';
+            return 'Minimal';
+          };
+          
+          // Get investment recommendation based on risk profile
+          const getInvestmentRecommendation = () => {
+            const weightedRisk = calculateWeightedRisk();
+            const market = selectedMarket;
+            
+            if (weightedRisk >= 60) {
+              return "CAUTION: This market shows elevated risk factors that may indicate potential correction. Consider reducing exposure or implementing hedging strategies.";
+            } else if (weightedRisk >= 40) {
+              if (market.costTrajectoriesRisk < 30) {
+                return "SELECTIVE BUY: While overall risk is moderate, low cost trajectory risk suggests potential for stable returns in select submarkets.";
+              } else {
+                return "HOLD: Moderate overall risk profile suggests maintaining current positions without significant expansion.";
+              }
+            } else {
+              return "BUY OPPORTUNITY: Lower risk profile indicates potential value, especially if your investment horizon exceeds 5 years.";
+            }
+          };
+
+          // Custom tooltip for radar chart
+          const CustomTooltip = ({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0];
+              return (
+                <div style={{
+                  backgroundColor: "white",
+                  padding: "12px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "6px"
+                }}>
+                  <p style={{ fontWeight: "600" }}>{data.payload.subject}: {data.value}</p>
+                  <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                    Risk Level: {getRiskCategory(data.value)}
+                  </p>
+                </div>
+              );
+            }
+            return null;
+          };
+
+          // Calculate weighted composite risk
+          const weightedRisk = calculateWeightedRisk();
+          
+          return (
+            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800 mb-1">Interactive Risk Score Calculator</h2>
+              <p className="text-sm text-gray-600 mb-6">Customize risk weightings to match your investment priorities</p>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ gridTemplateColumns: "1fr 2fr" }}>
+                {/* Left Column: Controls */}
+                <div className="lg:col-span-1 space-y-6">
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold mb-3">Select Metro Area</h3>
+                    <select 
+                      className="w-full p-2 border rounded-md mb-6"
+                      value={selectedMetro}
+                      onChange={(e) => setSelectedMetro(e.target.value)}
+                      style={{ borderColor: "#e5e7eb" }}
+                    >
+                      {marketData.map(market => (
+                        <option key={market.metro} value={market.metro}>{market.metro}</option>
+                      ))}
+                    </select>
+                    
+                    <h3 className="font-semibold mb-3">Customize Risk Weightings (%)</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm mb-1">Affordability Risk</label>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          className="w-full"
+                          value={weighting.affordability}
+                          onChange={(e) => setWeighting({...weighting, affordability: parseInt(e.target.value)})}
+                        />
+                        <div className="flex justify-between text-xs">
+                          <span>0%</span>
+                          <span className="font-medium">{weighting.affordability}%</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm mb-1">Climate Risk</label>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          className="w-full"
+                          value={weighting.climate}
+                          onChange={(e) => setWeighting({...weighting, climate: parseInt(e.target.value)})}
+                        />
+                        <div className="flex justify-between text-xs">
+                          <span>0%</span>
+                          <span className="font-medium">{weighting.climate}%</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm mb-1">Market Liquidity Risk</label>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          className="w-full"
+                          value={weighting.liquidity}
+                          onChange={(e) => setWeighting({...weighting, liquidity: parseInt(e.target.value)})}
+                        />
+                        <div className="flex justify-between text-xs">
+                          <span>0%</span>
+                          <span className="font-medium">{weighting.liquidity}%</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm mb-1">Cost Trajectories Risk</label>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          className="w-full"
+                          value={weighting.costTrajectories}
+                          onChange={(e) => setWeighting({...weighting, costTrajectories: parseInt(e.target.value)})}
+                        />
+                        <div className="flex justify-between text-xs">
+                          <span>0%</span>
+                          <span className="font-medium">{weighting.costTrajectories}%</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <button 
+                        className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm w-full"
+                        onClick={() => setWeighting({
+                          affordability: 25,
+                          climate: 25,
+                          liquidity: 25,
+                          costTrajectories: 25
+                        })}
+                      >
+                        Reset to Equal Weights
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold mb-2">Key Metrics</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center border-b pb-2">
+                        <span className="text-sm">Property Tax Change:</span>
+                        <span className="font-medium">{selectedMarket.propertyTaxChange}%</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b pb-2">
+                        <span className="text-sm">Insurance Premium Change:</span>
+                        <span className="font-medium">{selectedMarket.insurancePremiumChange}%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Official Risk Category:</span>
+                        <span 
+                          className="px-2 py-1 rounded text-xs font-semibold text-white"
+                          style={{ backgroundColor: getRiskColor(selectedMarket.compositeRisk) }}
+                        >
+                          {selectedMarket.riskCategory}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Right Columns: Visualization and Analysis */}
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 h-80">
+                    <Recharts.ResponsiveContainer width="100%" height="100%">
+                      <Recharts.RadarChart cx="50%" cy="50%" outerRadius="80%" data={prepareRadarData()}>
+                        <Recharts.PolarGrid stroke="#cccccc" />
+                        <Recharts.PolarAngleAxis dataKey="subject" tick={{ fill: '#666666', fontSize: 12 }} />
+                        <Recharts.PolarRadiusAxis angle={90} domain={[0, 100]} tickCount={6} />
+                        <Recharts.Radar
+                          name="Risk Score"
+                          dataKey="A"
+                          stroke={getRiskColor(weightedRisk)}
+                          fill={getRiskColor(weightedRisk)}
+                          fillOpacity={0.5}
+                        />
+                        <Recharts.Tooltip content={<CustomTooltip />} />
+                      </Recharts.RadarChart>
+                    </Recharts.ResponsiveContainer>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-center mb-4">
+                      <h3 className="font-semibold">Your Customized Risk Assessment:</h3>
+                      <div className="ml-auto">
+                        <span 
+                          className="text-2xl font-bold"
+                          style={{ color: getRiskColor(weightedRisk) }}
+                        >
+                          {weightedRisk}
+                        </span>
+                        <span className="text-sm text-gray-500">/100</span>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className="p-3 mb-4 rounded-md text-white font-medium"
+                      style={{ backgroundColor: getRiskColor(weightedRisk) }}
+                    >
+                      {getRiskCategory(weightedRisk)} Risk: {getInvestmentRecommendation()}
+                    </div>
+                    
+                    <h4 className="font-semibold mb-2">Premium Risk Insights:</h4>
+                    <ul className="text-sm space-y-2">
+                      <li className="flex items-start">
+                        <span className="text-blue-600 mr-2">•</span>
+                        <span>
+                          <strong>Affordability Risk ({selectedMarket.affordabilityRisk}/100):</strong> {
+                            selectedMarket.affordabilityRisk > 60 
+                              ? "Price-to-income ratios significantly exceed historical norms, suggesting potential for price correction."
+                              : selectedMarket.affordabilityRisk > 40 
+                                ? "Moderate affordability concerns but still within manageable ranges for local income levels."
+                                : "Strong affordability metrics indicate sustainable pricing relative to local incomes."
+                          }
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-600 mr-2">•</span>
+                        <span>
+                          <strong>Climate Risk ({selectedMarket.climateRisk}/100):</strong> {
+                            selectedMarket.climateRisk > 60 
+                              ? "Significant exposure to climate events with increasing insurance costs and potential property devaluation."
+                              : selectedMarket.climateRisk > 40 
+                                ? "Moderate climate concerns requiring attention to property-specific location and mitigation."
+                                : "Relatively favorable climate risk profile compared to national averages."
+                          }
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-600 mr-2">•</span>
+                        <span>
+                          <strong>Market Liquidity Risk ({selectedMarket.marketLiquidityRisk}/100):</strong> {
+                            selectedMarket.marketLiquidityRisk > 60 
+                              ? "Extended days-on-market and high inventory suggest potential challenges in exit strategies."
+                              : selectedMarket.marketLiquidityRisk > 40 
+                                ? "Average market velocity with some seasonal variation in liquidity."
+                                : "Strong transaction volume and limited inventory support reliable exit options."
+                          }
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+        
+        ReactDOM.render(<RiskRadarCalculator />, document.getElementById('root'));
+    </script>
+</body>
+</html>
