@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Quadrant Chart</title>
+    <!-- Load React, ReactDOM, and Recharts from CDN -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            height: 100vh; 
+            font-family: Arial, sans-serif;
+        }
+        /* Tailwind-like utility classes */
+        .bg-white { background-color: white; }
+        .p-6 { padding: 24px; }
+        .rounded-lg { border-radius: 8px; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .border { border: 1px solid; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .text-2xl { font-size: 1.5rem; }
+        .font-bold { font-weight: 700; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .text-gray-800 { color: #1f2937; }
+        .text-sm { font-size: 0.875rem; }
+        .text-gray-600 { color: #4b5563; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .w-4 { width: 1rem; }
+        .h-4 { height: 1rem; }
+        .rounded-full { border-radius: 9999px; }
+        .mr-2 { margin-right: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div id="root" style="width: 100%; height: 100%;"></div>
+    
+    <script type="text/babel">
+        const RiskQuadrantChart = () => {
+          // Risk quadrant data
+          const data = [
+            { metro: "Atlanta, GA", currentRisk: 36, riskMomentum: 10, category: "Moderate" },
+            { metro: "Austin, TX", currentRisk: 66, riskMomentum: 69, category: "High" },
+            { metro: "Boston, MA", currentRisk: 35, riskMomentum: 0, category: "Moderate" },
+            { metro: "Chicago, IL", currentRisk: 29, riskMomentum: 23, category: "Low" },
+            { metro: "Dallas, TX", currentRisk: 44, riskMomentum: 41, category: "Moderate" },
+            { metro: "Denver, CO", currentRisk: 46, riskMomentum: 50, category: "Moderate" },
+            { metro: "Los Angeles, CA", currentRisk: 67, riskMomentum: 84, category: "High" },
+            { metro: "Miami, FL", currentRisk: 41, riskMomentum: 27, category: "Moderate" },
+            { metro: "New York, NY", currentRisk: 37, riskMomentum: 10, category: "Moderate" },
+            { metro: "San Francisco, CA", currentRisk: 65, riskMomentum: 100, category: "High" }
+          ];
+
+          // Average lines for quadrant formation
+          const avgCurrentRisk = data.reduce((sum, item) => sum + item.currentRisk, 0) / data.length;
+          const avgRiskMomentum = data.reduce((sum, item) => sum + item.riskMomentum, 0) / data.length;
+
+          // Color mapping based on risk category
+          const getColor = (category) => {
+            switch(category) {
+              case "High": return "#d32f2f";
+              case "Moderate": return "#f57c00";
+              case "Low": return "#388e3c";
+              default: return "#2196f3";
+            }
+          };
+
+          // Custom tooltip with descriptive information
+          const CustomTooltip = ({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              const quadrant = 
+                data.currentRisk >= avgCurrentRisk && data.riskMomentum >= avgRiskMomentum ? "High Risk & Accelerating" :
+                data.currentRisk >= avgCurrentRisk && data.riskMomentum < avgRiskMomentum ? "High Risk & Stable" :
+                data.currentRisk < avgCurrentRisk && data.riskMomentum >= avgRiskMomentum ? "Watch List - Emerging Risk" :
+                "Relative Stability";
+
+              return (
+                <div style={{
+                  backgroundColor: "white",
+                  padding: "16px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "6px"
+                }}>
+                  <h3 style={{ fontWeight: "bold", fontSize: "1.125rem", marginBottom: "8px" }}>{data.metro}</h3>
+                  <p style={{ fontSize: "0.875rem" }}>
+                    <span style={{ fontWeight: "600" }}>Risk Score:</span> {data.currentRisk}/100
+                  </p>
+                  <p style={{ fontSize: "0.875rem" }}>
+                    <span style={{ fontWeight: "600" }}>Risk Momentum:</span> {data.riskMomentum}/100
+                  </p>
+                  <p style={{ fontSize: "0.875rem" }}>
+                    <span style={{ fontWeight: "600" }}>Category:</span> {data.category}
+                  </p>
+                  <p style={{ fontSize: "0.875rem", marginTop: "8px", fontWeight: "600", color: getColor(data.category) }}>
+                    Quadrant: {quadrant}
+                  </p>
+                </div>
+              );
+            }
+            return null;
+          };
+
+          // Calculate bubble size based on combined risk factors
+          const getBubbleSize = (currentRisk, riskMomentum) => {
+            return (currentRisk + riskMomentum) / 2;
+          };
+
+          return (
+            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+              <h2 className="text-2xl font-bold mb-1 text-gray-800">2025 Housing Market Risk Quadrant</h2>
+              <p className="text-sm text-gray-600 mb-6">Plotting current risk against risk momentum reveals markets poised for potential correction</p>
+              
+              <div className="flex justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: "#d32f2f" }}></div>
+                  <span className="text-sm">High Risk</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: "#f57c00" }}></div>
+                  <span className="text-sm">Moderate Risk</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: "#388e3c" }}></div>
+                  <span className="text-sm">Low Risk</span>
+                </div>
+              </div>
+              
+              <Recharts.ResponsiveContainer width="100%" height={500}>
+                <Recharts.ScatterChart
+                  margin={{ top: 20, right: 20, bottom: 60, left: 20 }}
+                >
+                  <Recharts.CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                  <Recharts.XAxis 
+                    type="number" 
+                    dataKey="currentRisk" 
+                    name="Current Risk" 
+                    domain={[0, 100]}
+                    tickCount={6}
+                  >
+                    <Recharts.Label value="Current Risk (0-100)" offset={-20} position="insideBottom" />
+                  </Recharts.XAxis>
+                  <Recharts.YAxis 
+                    type="number" 
+                    dataKey="riskMomentum" 
+                    name="Risk Momentum" 
+                    domain={[0, 100]}
+                    tickCount={6}
+                  >
+                    <Recharts.Label 
+                      value="Risk Momentum (0-100)" 
+                      angle={-90} 
+                      position="insideLeft" 
+                      style={{ textAnchor: 'middle' }} 
+                    />
+                  </Recharts.YAxis>
+                  <Recharts.ZAxis 
+                    type="number" 
+                    dataKey={(data) => getBubbleSize(data.currentRisk, data.riskMomentum)} 
+                    range={[40, 80]} 
+                    name="Market Size" 
+                  />
+                  <Recharts.Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
+                  
+                  {/* Quadrant dividing lines */}
+                  <Recharts.ReferenceLine x={avgCurrentRisk} stroke="#666" strokeDasharray="3 3" />
+                  <Recharts.ReferenceLine y={avgRiskMomentum} stroke="#666" strokeDasharray="3 3" />
+                  
+                  <Recharts.Scatter name="Markets" data={data}>
+                    {data.map((entry, index) => (
+                      <Recharts.Cell key={`cell-${index}`} fill={getColor(entry.category)} />
+                    ))}
+                  </Recharts.Scatter>
+                </Recharts.ScatterChart>
+              </Recharts.ResponsiveContainer>
+              
+              <div className="mt-4 text-sm text-gray-600">
+                <p><strong>Note:</strong> Bubble size represents the combined risk intensity. Hover over each city for detailed insights.</p>
+                <p className="mt-2"><strong>Market Guidance:</strong> Cities in the top-right quadrant are experiencing high and accelerating risk conditions, making them vulnerable to potential market corrections in 2025.</p>
+              </div>
+            </div>
+          );
+        };
+        
+        ReactDOM.render(<RiskQuadrantChart />, document.getElementById('root'));
+    </script>
+</body>
+</html>
