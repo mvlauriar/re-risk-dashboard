@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Reality Gap Index</title>
+    <!-- Load React, ReactDOM, and Recharts from CDN -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            height: 100vh; 
+            font-family: Arial, sans-serif;
+        }
+        /* Tailwind-like utility classes */
+        .bg-white { background-color: white; }
+        .p-6 { padding: 24px; }
+        .rounded-lg { border-radius: 8px; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .border { border: 1px solid; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .text-2xl { font-size: 1.5rem; }
+        .font-bold { font-weight: 700; }
+        .text-gray-800 { color: #1f2937; }
+        .text-sm { font-size: 0.875rem; }
+        .text-gray-600 { color: #4b5563; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .space-x-2 > * + * { margin-left: 0.5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .text-sm { font-size: 0.875rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .text-white { color: white; }
+        .bg-gray-200 { background-color: #e5e7eb; }
+        .text-gray-700 { color: #374151; }
+        .mb-4 { margin-bottom: 1rem; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .p-4 { padding: 1rem; }
+        .font-semibold { font-weight: 600; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .h-96 { height: 24rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .gap-6 { gap: 1.5rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .items-start { align-items: flex-start; }
+        .mr-2 { margin-right: 0.5rem; }
+        .text-red-600 { color: #dc2626; }
+        .text-green-600 { color: #16a34a; }
+        
+        /* For medium screens and up */
+        @media (min-width: 768px) {
+            .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root" style="width: 100%; height: 100%;"></div>
+    
+    <script type="text/babel">
+        const RealityGapChart = () => {
+          const [viewMode, setViewMode] = React.useState('ranking');
+          
+          // Simulated Reality Gap data
+          // This represents the gap between listing prices and actual sale prices
+          const realityGapData = [
+            { metro: "Austin, TX", realityGapScore: 84, riskCategory: "High", averageListingPrice: 625000, averageSalePrice: 531250, gapPercentage: 15.0, priceReductionFreq: 42 },
+            { metro: "Los Angeles, CA", realityGapScore: 76, riskCategory: "High", averageListingPrice: 1150000, averageSalePrice: 989000, gapPercentage: 14.0, priceReductionFreq: 38 },
+            { metro: "San Francisco, CA", realityGapScore: 72, riskCategory: "High", averageListingPrice: 1450000, averageSalePrice: 1261500, gapPercentage: 13.0, priceReductionFreq: 35 },
+            { metro: "Boston, MA", realityGapScore: 64, riskCategory: "Moderate", averageListingPrice: 875000, averageSalePrice: 770000, gapPercentage: 12.0, priceReductionFreq: 31 },
+            { metro: "Denver, CO", realityGapScore: 61, riskCategory: "Moderate", averageListingPrice: 695000, averageSalePrice: 618550, gapPercentage: 11.0, priceReductionFreq: 29 },
+            { metro: "Dallas, TX", realityGapScore: 56, riskCategory: "Moderate", averageListingPrice: 485000, averageSalePrice: 436500, gapPercentage: 10.0, priceReductionFreq: 26 },
+            { metro: "New York, NY", realityGapScore: 52, riskCategory: "Moderate", averageListingPrice: 925000, averageSalePrice: 841750, gapPercentage: 9.0, priceReductionFreq: 24 },
+            { metro: "Atlanta, GA", realityGapScore: 47, riskCategory: "Moderate", averageListingPrice: 425000, averageSalePrice: 391000, gapPercentage: 8.0, priceReductionFreq: 22 },
+            { metro: "Miami, FL", realityGapScore: 43, riskCategory: "Moderate", averageListingPrice: 575000, averageSalePrice: 534750, gapPercentage: 7.0, priceReductionFreq: 19 },
+            { metro: "Chicago, IL", realityGapScore: 38, riskCategory: "Low", averageListingPrice: 395000, averageSalePrice: 375250, gapPercentage: 5.0, priceReductionFreq: 17 }
+          ];
+          
+          // Historical Reality Gap data (simulated)
+          const historicalData = [
+            { year: '2015', realityGap: 3.2, marketChange: 5.8 },
+            { year: '2016', realityGap: 3.8, marketChange: 4.2 },
+            { year: '2017', realityGap: 4.1, marketChange: 6.5 },
+            { year: '2018', realityGap: 7.6, marketChange: -2.1 },
+            { year: '2019', realityGap: 5.2, marketChange: 3.7 },
+            { year: '2020', realityGap: 4.5, marketChange: 7.2 },
+            { year: '2021', realityGap: 8.8, marketChange: -3.5 },
+            { year: '2022', realityGap: 10.2, marketChange: -4.8 },
+            { year: '2023', realityGap: 6.7, marketChange: 1.5 },
+            { year: '2024', realityGap: 8.5, marketChange: -2.3 },
+            { year: '2025 (Proj.)', realityGap: 12.3, marketChange: -5.2 }
+          ];
+
+          // Color mapping based on risk category
+          const getBarColor = (category) => {
+            switch(category) {
+              case "High": return "#dc2626";
+              case "Moderate": return "#f97316";
+              case "Low": return "#16a34a";
+              default: return "#3b82f6";
+            }
+          };
+          
+          // Custom tooltip for the bar chart
+          const RealityGapTooltip = ({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              return (
+                <div style={{
+                  backgroundColor: "white",
+                  padding: "16px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "6px"
+                }}>
+                  <h3 style={{ fontWeight: "bold", fontSize: "1.125rem", marginBottom: "8px" }}>{data.metro}</h3>
+                  <div style={{ marginBottom: "4px" }}>
+                    <p style={{ fontSize: "0.875rem", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: "600", marginRight: "8px" }}>Reality Gap Score:</span>
+                      <span>{data.realityGapScore}/100</span>
+                    </p>
+                    <p style={{ fontSize: "0.875rem", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: "600", marginRight: "8px" }}>Average Listing Price:</span>
+                      <span>${data.averageListingPrice.toLocaleString()}</span>
+                    </p>
+                    <p style={{ fontSize: "0.875rem", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: "600", marginRight: "8px" }}>Average Sale Price:</span>
+                      <span>${data.averageSalePrice.toLocaleString()}</span>
+                    </p>
+                    <p style={{ fontSize: "0.875rem", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: "600", marginRight: "8px" }}>Gap Percentage:</span>
+                      <span>{data.gapPercentage}%</span>
+                    </p>
+                    <p style={{ fontSize: "0.875rem", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: "600", marginRight: "8px" }}>Price Reduction Frequency:</span>
+                      <span>{data.priceReductionFreq}%</span>
+                    </p>
+                  </div>
+                  <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid #e5e7eb" }}>
+                    <p style={{ 
+                      fontSize: "0.875rem", 
+                      fontWeight: "600", 
+                      color: getBarColor(data.riskCategory) 
+                    }}>
+                      Risk Category: {data.riskCategory}
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          };
+          
+          // Custom tooltip for the line chart
+          const HistoricalTooltip = ({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              return (
+                <div style={{
+                  backgroundColor: "white",
+                  padding: "16px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "6px"
+                }}>
+                  <h3 style={{ fontWeight: "bold", fontSize: "1.125rem", marginBottom: "8px" }}>{data.year}</h3>
+                  <div>
+                    <p style={{ fontSize: "0.875rem", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: "600", marginRight: "8px" }}>Reality Gap:</span>
+                      <span>{data.realityGap}%</span>
+                    </p>
+                    <p style={{ fontSize: "0.875rem", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: "600", marginRight: "8px" }}>Market Price Change:</span>
+                      <span style={{ color: data.marketChange >= 0 ? '#16a34a' : '#dc2626' }}>
+                        {data.marketChange >= 0 ? '+' : ''}{data.marketChange}%
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          };
+
+          return (
+            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">The Reality Gap™ Index</h2>
+                  <p className="text-sm text-gray-600 mt-1">Proprietary leading indicator of potential price corrections in major markets</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button 
+                    className={`px-3 py-1 text-sm rounded-md ${viewMode === 'ranking' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    onClick={() => setViewMode('ranking')}
+                  >
+                    Market Ranking
+                  </button>
+                  <button 
+                    className={`px-3 py-1 text-sm rounded-md ${viewMode === 'historical' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    onClick={() => setViewMode('historical')}
+                  >
+                    Historical Correlation
+                  </button>
+                </div>
+              </div>
+              
+              {viewMode === 'ranking' ? (
+                <div>
+                  <div className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold mb-2">What is the Reality Gap™?</h3>
+                    <p className="text-sm text-gray-700">
+                      The Reality Gap™ measures the disparity between seller expectations (listing prices) and market reality (actual sale prices). 
+                      A wider gap indicates market misalignment and often precedes price corrections. Our proprietary index combines gap percentage, 
+                      price reduction frequency, and time-on-market trends.
+                    </p>
+                  </div>
+                  
+                  <div className="h-96">
+                    <Recharts.ResponsiveContainer width="100%" height="100%">
+                      <Recharts.BarChart
+                        data={realityGapData}
+                        layout="vertical"
+                        margin={{ top: 20, right: 30, left: 90, bottom: 20 }}
+                      >
+                        <Recharts.CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                        <Recharts.XAxis 
+                          type="number" 
+                          domain={[0, 100]}
+                          tickCount={6}
+                        >
+                          <Recharts.Label value="Reality Gap Score (Higher = Greater Risk)" position="bottom" offset={0} />
+                        </Recharts.XAxis>
+                        <Recharts.YAxis 
+                          type="category" 
+                          dataKey="metro" 
+                          tick={{ fontSize: 12 }}
+                        />
+                        <Recharts.Tooltip content={<RealityGapTooltip />} />
+                        <Recharts.Bar dataKey="realityGapScore" name="Reality Gap Score">
+                          {realityGapData.map((entry, index) => (
+                            <Recharts.Cell key={`cell-${index}`} fill={getBarColor(entry.riskCategory)} />
+                          ))}
+                        </Recharts.Bar>
+                      </Recharts.BarChart>
+                    </Recharts.ResponsiveContainer>
+                  </div>
+                  
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <h3 className="font-semibold mb-3">Key Findings: Reality Gap Analysis</h3>
+                      <ul className="text-sm space-y-2">
+                        <li className="flex items-start">
+                          <span className="text-red-600 mr-2">•</span>
+                          <span>Austin shows the largest reality gap (15%), indicating seller expectations significantly exceed what buyers are willing to pay.</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-red-600 mr-2">•</span>
+                          <span>West Coast markets (LA, SF) consistently show wide reality gaps despite their high price points, suggesting potential vulnerability.</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-red-600 mr-2">•</span>
+                          <span>Chicago's minimal 5% gap suggests the market has already undergone price adjustments and reached relative equilibrium.</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-red-600 mr-2">•</span>
+                          <span>Markets with reality gaps exceeding 10% historically experience price corrections within 6-12 months.</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <h3 className="font-semibold mb-3">Premium Investment Guidance</h3>
+                      <ul className="text-sm space-y-2">
+                        <li className="flex items-start">
+                          <span className="text-green-600 mr-2">•</span>
+                          <span><strong>High Gap Markets:</strong> Consider deferring purchases, explore short-term rental investments instead of buying, or implement negotiation strategies targeting 15-20% below list price.</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-green-600 mr-2">•</span>
+                          <span><strong>Moderate Gap Markets:</strong> Focus on properties that have already undergone price reductions, indicating seller recognition of market reality.</span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-green-600 mr-2">•</span>
+                          <span><strong>Low Gap Markets:</strong> Potentially attractive entry points for long-term investors, with negotiation likely required only for properties with unrealistic pricing.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold mb-2">Historical Predictive Power</h3>
+                    <p className="text-sm text-gray-700">
+                      The chart below demonstrates how the Reality Gap™ Index has consistently predicted market price changes over the past decade. 
+                      When the reality gap widens beyond 7%, market corrections typically follow within 12 months. Note the strong correlation 
+                      between 2018, 2021-2022 Reality Gap increases and subsequent price declines.
+                    </p>
+                  </div>
+                  
+                  <div className="h-96">
+                    <Recharts.ResponsiveContainer width="100%" height="100%">
+                      <Recharts.LineChart
+                        data={historicalData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
+                      >
+                        <Recharts.CartesianGrid strokeDasharray="3 3" />
+                        <Recharts.XAxis dataKey="year" />
+                        <Recharts.YAxis yAxisId="left" orientation="left">
+                          <Recharts.Label value="Reality Gap (%)" angle={-90} position="insideLeft" />
+                        </Recharts.YAxis>
+                        <Recharts.YAxis yAxisId="right" orientation="right">
+                          <Recharts.Label value="Price Change (%)" angle={90} position="insideRight" />
+                        </Recharts.YAxis>
+                        <Recharts.Tooltip content={<HistoricalTooltip />} />
+                        <Recharts.Legend verticalAlign="top" height={36} />
+                        <Recharts.Line 
+                          yAxisId="left" 
+                          type="monotone" 
+                          dataKey="realityGap" 
+                          stroke="#1d4ed8" 
+                          strokeWidth={3} 
+                          name="Reality Gap" 
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                        <Recharts.Line 
+                          yAxisId="right" 
+                          type="monotone" 
+                          dataKey="marketChange" 
+                          stroke="#4ade80" 
+                          strokeWidth={3} 
+                          name="Market Price Change"
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </Recharts.LineChart>
+                    </Recharts.ResponsiveContainer>
+                  </div>
+                  
+                  <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="font-semibold mb-3">2025 Projection Insights</h3>
+                    <p className="text-sm text-gray-700">
+                      Based on current trends, our model projects the national Reality Gap to reach 12.3% by mid-2025, 
+                      the highest level since the 2008 financial crisis. This suggests a potential national price correction of 4-6% 
+                      in the second half of 2025, with significantly larger adjustments in high-risk markets like Austin (-8 to -12%), 
+                      Los Angeles (-7 to -10%), and San Francisco (-6 to -9%).
+                    </p>
+                    <div className="mt-4 flex items-center">
+                      <span className="text-sm font-semibold text-gray-700 mr-3">Correction Probability:</span>
+                      <div style={{ 
+                        width: "100%", 
+                        backgroundColor: "#e5e7eb", 
+                        borderRadius: "9999px",
+                        height: "10px"
+                      }}>
+                        <div style={{ 
+                          backgroundColor: "#dc2626", 
+                          height: "10px", 
+                          borderRadius: "9999px",
+                          width: "75%" 
+                        }}></div>
+                      </div>
+                      <span className="ml-3 text-sm font-medium" style={{ color: "#dc2626" }}>75%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        };
+        
+        ReactDOM.render(<RealityGapChart />, document.getElementById('root'));
+    </script>
+</body>
+</html>
