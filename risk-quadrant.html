@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risk Quadrant Chart</title>
-    <!-- Load React, ReactDOM, and Recharts from CDN -->
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/recharts@2.1.9/umd/Recharts.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         body { 
             margin: 0; 
@@ -16,41 +14,77 @@
             height: 100vh; 
             font-family: Arial, sans-serif;
         }
-        /* Tailwind-like utility classes */
-        .bg-white { background-color: white; }
-        .p-6 { padding: 24px; }
-        .rounded-lg { border-radius: 8px; }
-        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .border { border: 1px solid; }
-        .border-gray-200 { border-color: #e5e7eb; }
-        .text-2xl { font-size: 1.5rem; }
-        .font-bold { font-weight: 700; }
-        .mb-1 { margin-bottom: 0.25rem; }
-        .text-gray-800 { color: #1f2937; }
-        .text-sm { font-size: 0.875rem; }
-        .text-gray-600 { color: #4b5563; }
-        .mb-6 { margin-bottom: 1.5rem; }
-        .flex { display: flex; }
-        .justify-between { justify-content: space-between; }
-        .items-center { align-items: center; }
-        .w-4 { width: 1rem; }
-        .h-4 { height: 1rem; }
-        .rounded-full { border-radius: 9999px; }
-        .mr-2 { margin-right: 0.5rem; }
-        .mt-4 { margin-top: 1rem; }
-        .mt-2 { margin-top: 0.5rem; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .data-point {
+            position: absolute;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 100;
+            max-width: 200px;
+        }
+        .divider-h, .divider-v {
+            position: absolute;
+            background: #666;
+            opacity: 0.5;
+        }
+        .divider-h {
+            width: 100%;
+            height: 1px;
+        }
+        .divider-v {
+            height: 100%;
+            width: 1px;
+        }
+        .axis-label {
+            position: absolute;
+            font-size: 12px;
+            color: #666;
+        }
+        .legend {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .quadrant-label {
+            position: absolute;
+            font-size: 11px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
-    <div id="root" style="width: 100%; height: 100%;"></div>
+    <div id="root" style="width: 100%; height: 100%; padding: 20px;"></div>
     
     <script type="text/babel">
-        // Make Recharts components available in the global scope for easier access
-        const {
-          ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, 
-          Tooltip, Legend, Label, ResponsiveContainer, Cell, ReferenceLine
-        } = Recharts;
-        
         const RiskQuadrantChart = () => {
           // Risk quadrant data
           const data = [
@@ -66,7 +100,7 @@
             { metro: "San Francisco, CA", currentRisk: 65, riskMomentum: 100, category: "High" }
           ];
 
-          // Average lines for quadrant formation
+          // Calculate averages for quadrants
           const avgCurrentRisk = data.reduce((sum, item) => sum + item.currentRisk, 0) / data.length;
           const avgRiskMomentum = data.reduce((sum, item) => sum + item.riskMomentum, 0) / data.length;
 
@@ -80,119 +114,121 @@
             }
           };
 
-          // Custom tooltip with descriptive information
-          const CustomTooltip = ({ active, payload }) => {
-            if (active && payload && payload.length) {
-              const data = payload[0].payload;
-              const quadrant = 
-                data.currentRisk >= avgCurrentRisk && data.riskMomentum >= avgRiskMomentum ? "High Risk & Accelerating" :
-                data.currentRisk >= avgCurrentRisk && data.riskMomentum < avgRiskMomentum ? "High Risk & Stable" :
-                data.currentRisk < avgCurrentRisk && data.riskMomentum >= avgRiskMomentum ? "Watch List - Emerging Risk" :
-                "Relative Stability";
-
-              return (
-                <div style={{
-                  backgroundColor: "white",
-                  padding: "16px",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "6px"
-                }}>
-                  <h3 style={{ fontWeight: "bold", fontSize: "1.125rem", marginBottom: "8px" }}>{data.metro}</h3>
-                  <p style={{ fontSize: "0.875rem" }}>
-                    <span style={{ fontWeight: "600" }}>Risk Score:</span> {data.currentRisk}/100
-                  </p>
-                  <p style={{ fontSize: "0.875rem" }}>
-                    <span style={{ fontWeight: "600" }}>Risk Momentum:</span> {data.riskMomentum}/100
-                  </p>
-                  <p style={{ fontSize: "0.875rem" }}>
-                    <span style={{ fontWeight: "600" }}>Category:</span> {data.category}
-                  </p>
-                  <p style={{ fontSize: "0.875rem", marginTop: "8px", fontWeight: "600", color: getColor(data.category) }}>
-                    Quadrant: {quadrant}
-                  </p>
-                </div>
-              );
-            }
-            return null;
+          const [activeTooltip, setActiveTooltip] = React.useState(null);
+          
+          // Get quadrant name based on position
+          const getQuadrant = (currentRisk, riskMomentum) => {
+            return currentRisk >= avgCurrentRisk && riskMomentum >= avgRiskMomentum ? "High Risk & Accelerating" :
+                   currentRisk >= avgCurrentRisk && riskMomentum < avgRiskMomentum ? "High Risk & Stable" :
+                   currentRisk < avgCurrentRisk && riskMomentum >= avgRiskMomentum ? "Watch List - Emerging Risk" :
+                   "Relative Stability";
           };
-
-          // Calculate bubble size based on combined risk factors
-          const getBubbleSize = (currentRisk, riskMomentum) => {
-            return (currentRisk + riskMomentum) / 2;
+          
+          // Calculate size based on combined risk
+          const getSize = (currentRisk, riskMomentum) => {
+            return 15 + ((currentRisk + riskMomentum) / 2) * 0.3;
           };
-
+          
           return (
-            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-              <h2 className="text-2xl font-bold mb-1 text-gray-800">2025 Housing Market Risk Quadrant</h2>
-              <p className="text-sm text-gray-600 mb-6">Plotting current risk against risk momentum reveals markets poised for potential correction</p>
+            <div style={{
+              backgroundColor: "white",
+              padding: "24px",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              border: "1px solid #e5e7eb"
+            }}>
+              <h2 style={{fontSize: "1.5rem", fontWeight: "bold", marginBottom: "4px", color: "#1f2937"}}>
+                2025 Housing Market Risk Quadrant
+              </h2>
+              <p style={{fontSize: "0.875rem", color: "#4b5563", marginBottom: "24px"}}>
+                Plotting current risk against risk momentum reveals markets poised for potential correction
+              </p>
               
-              <div className="flex justify-between mb-6">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: "#d32f2f" }}></div>
-                  <span className="text-sm">High Risk</span>
+              <div className="legend">
+                <div className="legend-item">
+                  <div className="legend-color" style={{backgroundColor: "#d32f2f"}}></div>
+                  <span style={{fontSize: "0.875rem"}}>High Risk</span>
                 </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: "#f57c00" }}></div>
-                  <span className="text-sm">Moderate Risk</span>
+                <div className="legend-item">
+                  <div className="legend-color" style={{backgroundColor: "#f57c00"}}></div>
+                  <span style={{fontSize: "0.875rem"}}>Moderate Risk</span>
                 </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: "#388e3c" }}></div>
-                  <span className="text-sm">Low Risk</span>
+                <div className="legend-item">
+                  <div className="legend-color" style={{backgroundColor: "#388e3c"}}></div>
+                  <span style={{fontSize: "0.875rem"}}>Low Risk</span>
                 </div>
               </div>
               
-              <ResponsiveContainer width="100%" height={500}>
-                <ScatterChart
-                  margin={{ top: 20, right: 20, bottom: 60, left: 20 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                  <XAxis 
-                    type="number" 
-                    dataKey="currentRisk" 
-                    name="Current Risk" 
-                    domain={[0, 100]}
-                    tickCount={6}
-                  >
-                    <Label value="Current Risk (0-100)" offset={-20} position="insideBottom" />
-                  </XAxis>
-                  <YAxis 
-                    type="number" 
-                    dataKey="riskMomentum" 
-                    name="Risk Momentum" 
-                    domain={[0, 100]}
-                    tickCount={6}
-                  >
-                    <Label 
-                      value="Risk Momentum (0-100)" 
-                      angle={-90} 
-                      position="insideLeft" 
-                      style={{ textAnchor: 'middle' }} 
-                    />
-                  </YAxis>
-                  <ZAxis 
-                    type="number" 
-                    dataKey={(data) => getBubbleSize(data.currentRisk, data.riskMomentum)} 
-                    range={[40, 80]} 
-                    name="Market Size" 
-                  />
-                  <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-                  
-                  {/* Quadrant dividing lines */}
-                  <ReferenceLine x={avgCurrentRisk} stroke="#666" strokeDasharray="3 3" />
-                  <ReferenceLine y={avgRiskMomentum} stroke="#666" strokeDasharray="3 3" />
-                  
-                  <Scatter name="Markets" data={data}>
-                    {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getColor(entry.category)} />
-                    ))}
-                  </Scatter>
-                </ScatterChart>
-              </ResponsiveContainer>
+              <div className="chart-container">
+                {/* X and Y axis labels */}
+                <div className="axis-label" style={{bottom: "5px", left: "50%", transform: "translateX(-50%)"}}>
+                  Current Risk (0-100)
+                </div>
+                <div className="axis-label" style={{top: "50%", left: "5px", transform: "translateY(-50%) rotate(-90deg)", transformOrigin: "left"}}>
+                  Risk Momentum (0-100)
+                </div>
+                
+                {/* Quadrant dividing lines */}
+                <div className="divider-h" style={{top: `${100 - avgRiskMomentum}%`}}></div>
+                <div className="divider-v" style={{left: `${avgCurrentRisk}%`}}></div>
+                
+                {/* Quadrant labels */}
+                <div className="quadrant-label" style={{top: "15%", right: "15%"}}>High Risk & Accelerating</div>
+                <div className="quadrant-label" style={{top: "15%", left: "15%"}}>Watch List - Emerging Risk</div>
+                <div className="quadrant-label" style={{bottom: "15%", right: "15%"}}>High Risk & Stable</div>
+                <div className="quadrant-label" style={{bottom: "15%", left: "15%"}}>Relative Stability</div>
+                
+                {/* Data points */}
+                {data.map((item, index) => (
+                  <div key={index}>
+                    <div 
+                      className="data-point"
+                      style={{
+                        left: `${item.currentRisk}%`,
+                        top: `${100 - item.riskMomentum}%`,
+                        width: `${getSize(item.currentRisk, item.riskMomentum)}px`,
+                        height: `${getSize(item.currentRisk, item.riskMomentum)}px`,
+                        backgroundColor: getColor(item.category),
+                      }}
+                      onMouseEnter={() => setActiveTooltip(index)}
+                      onMouseLeave={() => setActiveTooltip(null)}
+                    ></div>
+                    
+                    {/* Tooltip */}
+                    {activeTooltip === index && (
+                      <div className="tooltip" style={{
+                        display: 'block',
+                        left: `${Math.min(item.currentRisk, 85)}%`,
+                        top: `${Math.max(100 - item.riskMomentum, 15)}%`
+                      }}>
+                        <h3 style={{margin: 0, marginBottom: "5px", fontWeight: "bold"}}>{item.metro}</h3>
+                        <p style={{margin: "3px 0", fontSize: "0.875rem"}}>
+                          <strong>Risk Score:</strong> {item.currentRisk}/100
+                        </p>
+                        <p style={{margin: "3px 0", fontSize: "0.875rem"}}>
+                          <strong>Risk Momentum:</strong> {item.riskMomentum}/100
+                        </p>
+                        <p style={{margin: "3px 0", fontSize: "0.875rem"}}>
+                          <strong>Category:</strong> {item.category}
+                        </p>
+                        <p style={{
+                          margin: "3px 0", 
+                          marginTop: "8px", 
+                          fontSize: "0.875rem", 
+                          fontWeight: "bold", 
+                          color: getColor(item.category)
+                        }}>
+                          Quadrant: {getQuadrant(item.currentRisk, item.riskMomentum)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
               
-              <div className="mt-4 text-sm text-gray-600">
+              <div style={{marginTop: "16px", fontSize: "0.875rem", color: "#4b5563"}}>
                 <p><strong>Note:</strong> Bubble size represents the combined risk intensity. Hover over each city for detailed insights.</p>
-                <p className="mt-2"><strong>Market Guidance:</strong> Cities in the top-right quadrant are experiencing high and accelerating risk conditions, making them vulnerable to potential market corrections in 2025.</p>
+                <p style={{marginTop: "8px"}}><strong>Market Guidance:</strong> Cities in the top-right quadrant are experiencing high and accelerating risk conditions, making them vulnerable to potential market corrections in 2025.</p>
               </div>
             </div>
           );
