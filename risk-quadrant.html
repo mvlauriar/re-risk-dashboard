@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risk Quadrant Chart</title>
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         body { 
             margin: 0; 
@@ -14,50 +11,32 @@
             height: 100vh; 
             font-family: Arial, sans-serif;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
+        .container {
+            padding: 24px;
+            background-color: white;
             border-radius: 8px;
-            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            margin: 20px;
         }
-        .data-point {
-            position: absolute;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.3s ease;
-            cursor: pointer;
+        h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #1f2937;
         }
-        .tooltip {
-            position: absolute;
-            background: white;
-            border: 1px solid #ccc;
+        p {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        .chart {
+            position: relative;
+            margin: 20px 0;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            padding: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: none;
-            z-index: 100;
-            max-width: 200px;
-        }
-        .divider-h, .divider-v {
-            position: absolute;
-            background: #666;
-            opacity: 0.5;
-        }
-        .divider-h {
+            height: 500px;
             width: 100%;
-            height: 1px;
-        }
-        .divider-v {
-            height: 100%;
-            width: 1px;
-        }
-        .axis-label {
-            position: absolute;
-            font-size: 12px;
-            color: #666;
+            background-color: #f8f9fa;
         }
         .legend {
             display: flex;
@@ -74,167 +53,166 @@
             border-radius: 50%;
             margin-right: 8px;
         }
-        .quadrant-label {
-            position: absolute;
-            font-size: 11px;
-            color: #666;
-        }
     </style>
 </head>
 <body>
-    <div id="root" style="width: 100%; height: 100%; padding: 20px;"></div>
-    
-    <script type="text/babel">
-        const RiskQuadrantChart = () => {
-          // Risk quadrant data
-          const data = [
-            { metro: "Atlanta, GA", currentRisk: 36, riskMomentum: 10, category: "Moderate" },
-            { metro: "Austin, TX", currentRisk: 66, riskMomentum: 69, category: "High" },
-            { metro: "Boston, MA", currentRisk: 35, riskMomentum: 0, category: "Moderate" },
-            { metro: "Chicago, IL", currentRisk: 29, riskMomentum: 23, category: "Low" },
-            { metro: "Dallas, TX", currentRisk: 44, riskMomentum: 41, category: "Moderate" },
-            { metro: "Denver, CO", currentRisk: 46, riskMomentum: 50, category: "Moderate" },
-            { metro: "Los Angeles, CA", currentRisk: 67, riskMomentum: 84, category: "High" },
-            { metro: "Miami, FL", currentRisk: 41, riskMomentum: 27, category: "Moderate" },
-            { metro: "New York, NY", currentRisk: 37, riskMomentum: 10, category: "Moderate" },
-            { metro: "San Francisco, CA", currentRisk: 65, riskMomentum: 100, category: "High" }
-          ];
-
-          // Calculate averages for quadrants
-          const avgCurrentRisk = data.reduce((sum, item) => sum + item.currentRisk, 0) / data.length;
-          const avgRiskMomentum = data.reduce((sum, item) => sum + item.riskMomentum, 0) / data.length;
-
-          // Color mapping based on risk category
-          const getColor = (category) => {
-            switch(category) {
-              case "High": return "#d32f2f";
-              case "Moderate": return "#f57c00";
-              case "Low": return "#388e3c";
-              default: return "#2196f3";
-            }
-          };
-
-          const [activeTooltip, setActiveTooltip] = React.useState(null);
-          
-          // Get quadrant name based on position
-          const getQuadrant = (currentRisk, riskMomentum) => {
-            return currentRisk >= avgCurrentRisk && riskMomentum >= avgRiskMomentum ? "High Risk & Accelerating" :
-                   currentRisk >= avgCurrentRisk && riskMomentum < avgRiskMomentum ? "High Risk & Stable" :
-                   currentRisk < avgCurrentRisk && riskMomentum >= avgRiskMomentum ? "Watch List - Emerging Risk" :
-                   "Relative Stability";
-          };
-          
-          // Calculate size based on combined risk
-          const getSize = (currentRisk, riskMomentum) => {
-            return 15 + ((currentRisk + riskMomentum) / 2) * 0.3;
-          };
-          
-          return (
-            <div style={{
-              backgroundColor: "white",
-              padding: "24px",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-              border: "1px solid #e5e7eb"
-            }}>
-              <h2 style={{fontSize: "1.5rem", fontWeight: "bold", marginBottom: "4px", color: "#1f2937"}}>
-                2025 Housing Market Risk Quadrant
-              </h2>
-              <p style={{fontSize: "0.875rem", color: "#4b5563", marginBottom: "24px"}}>
-                Plotting current risk against risk momentum reveals markets poised for potential correction
-              </p>
-              
-              <div className="legend">
-                <div className="legend-item">
-                  <div className="legend-color" style={{backgroundColor: "#d32f2f"}}></div>
-                  <span style={{fontSize: "0.875rem"}}>High Risk</span>
-                </div>
-                <div className="legend-item">
-                  <div className="legend-color" style={{backgroundColor: "#f57c00"}}></div>
-                  <span style={{fontSize: "0.875rem"}}>Moderate Risk</span>
-                </div>
-                <div className="legend-item">
-                  <div className="legend-color" style={{backgroundColor: "#388e3c"}}></div>
-                  <span style={{fontSize: "0.875rem"}}>Low Risk</span>
-                </div>
-              </div>
-              
-              <div className="chart-container">
-                {/* X and Y axis labels */}
-                <div className="axis-label" style={{bottom: "5px", left: "50%", transform: "translateX(-50%)"}}>
-                  Current Risk (0-100)
-                </div>
-                <div className="axis-label" style={{top: "50%", left: "5px", transform: "translateY(-50%) rotate(-90deg)", transformOrigin: "left"}}>
-                  Risk Momentum (0-100)
-                </div>
-                
-                {/* Quadrant dividing lines */}
-                <div className="divider-h" style={{top: `${100 - avgRiskMomentum}%`}}></div>
-                <div className="divider-v" style={{left: `${avgCurrentRisk}%`}}></div>
-                
-                {/* Quadrant labels */}
-                <div className="quadrant-label" style={{top: "15%", right: "15%"}}>High Risk & Accelerating</div>
-                <div className="quadrant-label" style={{top: "15%", left: "15%"}}>Watch List - Emerging Risk</div>
-                <div className="quadrant-label" style={{bottom: "15%", right: "15%"}}>High Risk & Stable</div>
-                <div className="quadrant-label" style={{bottom: "15%", left: "15%"}}>Relative Stability</div>
-                
-                {/* Data points */}
-                {data.map((item, index) => (
-                  <div key={index}>
-                    <div 
-                      className="data-point"
-                      style={{
-                        left: `${item.currentRisk}%`,
-                        top: `${100 - item.riskMomentum}%`,
-                        width: `${getSize(item.currentRisk, item.riskMomentum)}px`,
-                        height: `${getSize(item.currentRisk, item.riskMomentum)}px`,
-                        backgroundColor: getColor(item.category),
-                      }}
-                      onMouseEnter={() => setActiveTooltip(index)}
-                      onMouseLeave={() => setActiveTooltip(null)}
-                    ></div>
-                    
-                    {/* Tooltip */}
-                    {activeTooltip === index && (
-                      <div className="tooltip" style={{
-                        display: 'block',
-                        left: `${Math.min(item.currentRisk, 85)}%`,
-                        top: `${Math.max(100 - item.riskMomentum, 15)}%`
-                      }}>
-                        <h3 style={{margin: 0, marginBottom: "5px", fontWeight: "bold"}}>{item.metro}</h3>
-                        <p style={{margin: "3px 0", fontSize: "0.875rem"}}>
-                          <strong>Risk Score:</strong> {item.currentRisk}/100
-                        </p>
-                        <p style={{margin: "3px 0", fontSize: "0.875rem"}}>
-                          <strong>Risk Momentum:</strong> {item.riskMomentum}/100
-                        </p>
-                        <p style={{margin: "3px 0", fontSize: "0.875rem"}}>
-                          <strong>Category:</strong> {item.category}
-                        </p>
-                        <p style={{
-                          margin: "3px 0", 
-                          marginTop: "8px", 
-                          fontSize: "0.875rem", 
-                          fontWeight: "bold", 
-                          color: getColor(item.category)
-                        }}>
-                          Quadrant: {getQuadrant(item.currentRisk, item.riskMomentum)}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              <div style={{marginTop: "16px", fontSize: "0.875rem", color: "#4b5563"}}>
-                <p><strong>Note:</strong> Bubble size represents the combined risk intensity. Hover over each city for detailed insights.</p>
-                <p style={{marginTop: "8px"}}><strong>Market Guidance:</strong> Cities in the top-right quadrant are experiencing high and accelerating risk conditions, making them vulnerable to potential market corrections in 2025.</p>
-              </div>
-            </div>
-          );
-        };
+    <div class="container">
+        <h2>2025 Housing Market Risk Quadrant</h2>
+        <p>Plotting current risk against risk momentum reveals markets poised for potential correction</p>
         
-        ReactDOM.render(<RiskQuadrantChart />, document.getElementById('root'));
-    </script>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #d32f2f;"></div>
+                <span style="font-size: 0.875rem;">High Risk</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f57c00;"></div>
+                <span style="font-size: 0.875rem;">Moderate Risk</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #388e3c;"></div>
+                <span style="font-size: 0.875rem;">Low Risk</span>
+            </div>
+        </div>
+        
+        <div class="chart">
+            <svg width="100%" height="100%" viewBox="0 0 800 600">
+                <!-- Background grid -->
+                <g fill="none" stroke="#e0e0e0" stroke-width="1">
+                    <line x1="0" y1="0" x2="800" y2="0" />
+                    <line x1="0" y1="150" x2="800" y2="150" />
+                    <line x1="0" y1="300" x2="800" y2="300" />
+                    <line x1="0" y1="450" x2="800" y2="450" />
+                    <line x1="0" y1="600" x2="800" y2="600" />
+                    
+                    <line x1="0" y1="0" x2="0" y2="600" />
+                    <line x1="200" y1="0" x2="200" y2="600" />
+                    <line x1="400" y1="0" x2="400" y2="600" />
+                    <line x1="600" y1="0" x2="600" y2="600" />
+                    <line x1="800" y1="0" x2="800" y2="600" />
+                </g>
+                
+                <!-- Quadrant dividers -->
+                <line x1="400" y1="0" x2="400" y2="600" stroke="#666" stroke-width="2" stroke-dasharray="5,5" />
+                <line x1="0" y1="300" x2="800" y2="300" stroke="#666" stroke-width="2" stroke-dasharray="5,5" />
+                
+                <!-- Quadrant labels -->
+                <text x="600" y="100" fill="#666" font-size="14">High Risk & Accelerating</text>
+                <text x="200" y="100" fill="#666" font-size="14">Watch List - Emerging Risk</text>
+                <text x="600" y="500" fill="#666" font-size="14">High Risk & Stable</text>
+                <text x="200" y="500" fill="#666" font-size="14">Relative Stability</text>
+                
+                <!-- Axis labels -->
+                <text x="400" y="580" fill="#666" font-size="14" text-anchor="middle">Current Risk (0-100)</text>
+                <text x="30" y="300" fill="#666" font-size="14" transform="rotate(-90,30,300)" text-anchor="middle">Risk Momentum (0-100)</text>
+                
+                <!-- Data points -->
+                <!-- Atlanta: 36, 10, Moderate -->
+                <circle cx="288" cy="540" r="20" fill="#f57c00">
+                    <title>Atlanta, GA
+Risk Score: 36/100
+Risk Momentum: 10/100
+Category: Moderate
+Quadrant: Relative Stability</title>
+                </circle>
+                <text x="288" y="545" font-size="10" text-anchor="middle" fill="white">ATL</text>
+                
+                <!-- Austin: 66, 69, High -->
+                <circle cx="528" cy="186" r="30" fill="#d32f2f">
+                    <title>Austin, TX
+Risk Score: 66/100
+Risk Momentum: 69/100
+Category: High
+Quadrant: High Risk & Accelerating</title>
+                </circle>
+                <text x="528" y="190" font-size="10" text-anchor="middle" fill="white">AUS</text>
+                
+                <!-- Boston: 35, 0, Moderate -->
+                <circle cx="280" cy="600" r="18" fill="#f57c00">
+                    <title>Boston, MA
+Risk Score: 35/100
+Risk Momentum: 0/100
+Category: Moderate
+Quadrant: Relative Stability</title>
+                </circle>
+                <text x="280" y="604" font-size="10" text-anchor="middle" fill="white">BOS</text>
+                
+                <!-- Chicago: 29, 23, Low -->
+                <circle cx="232" cy="462" r="16" fill="#388e3c">
+                    <title>Chicago, IL
+Risk Score: 29/100
+Risk Momentum: 23/100
+Category: Low
+Quadrant: Relative Stability</title>
+                </circle>
+                <text x="232" y="466" font-size="10" text-anchor="middle" fill="white">CHI</text>
+                
+                <!-- Dallas: 44, 41, Moderate -->
+                <circle cx="352" cy="354" r="22" fill="#f57c00">
+                    <title>Dallas, TX
+Risk Score: 44/100
+Risk Momentum: 41/100
+Category: Moderate
+Quadrant: Watch List - Emerging Risk</title>
+                </circle>
+                <text x="352" y="358" font-size="10" text-anchor="middle" fill="white">DAL</text>
+                
+                <!-- Denver: 46, 50, Moderate -->
+                <circle cx="368" cy="300" r="24" fill="#f57c00">
+                    <title>Denver, CO
+Risk Score: 46/100
+Risk Momentum: 50/100
+Category: Moderate
+Quadrant: Watch List - Emerging Risk</title>
+                </circle>
+                <text x="368" y="304" font-size="10" text-anchor="middle" fill="white">DEN</text>
+                
+                <!-- Los Angeles: 67, 84, High -->
+                <circle cx="536" cy="96" r="32" fill="#d32f2f">
+                    <title>Los Angeles, CA
+Risk Score: 67/100
+Risk Momentum: 84/100
+Category: High
+Quadrant: High Risk & Accelerating</title>
+                </circle>
+                <text x="536" y="100" font-size="10" text-anchor="middle" fill="white">LA</text>
+                
+                <!-- Miami: 41, 27, Moderate -->
+                <circle cx="328" cy="438" r="20" fill="#f57c00">
+                    <title>Miami, FL
+Risk Score: 41/100
+Risk Momentum: 27/100
+Category: Moderate
+Quadrant: Relative Stability</title>
+                </circle>
+                <text x="328" y="442" font-size="10" text-anchor="middle" fill="white">MIA</text>
+                
+                <!-- New York: 37, 10, Moderate -->
+                <circle cx="296" cy="540" r="18" fill="#f57c00">
+                    <title>New York, NY
+Risk Score: 37/100
+Risk Momentum: 10/100
+Category: Moderate
+Quadrant: Relative Stability</title>
+                </circle>
+                <text x="296" y="544" font-size="10" text-anchor="middle" fill="white">NYC</text>
+                
+                <!-- San Francisco: 65, 100, High -->
+                <circle cx="520" cy="0" r="35" fill="#d32f2f">
+                    <title>San Francisco, CA
+Risk Score: 65/100
+Risk Momentum: 100/100
+Category: High
+Quadrant: High Risk & Accelerating</title>
+                </circle>
+                <text x="520" y="4" font-size="10" text-anchor="middle" fill="white">SF</text>
+            </svg>
+        </div>
+        
+        <div>
+            <p><strong>Note:</strong> Bubble size represents the combined risk intensity. Hover over each city for detailed insights.</p>
+            <p style="margin-top: 8px;"><strong>Market Guidance:</strong> Cities in the top-right quadrant are experiencing high and accelerating risk conditions, making them vulnerable to potential market corrections in 2025.</p>
+        </div>
+    </div>
 </body>
 </html>
