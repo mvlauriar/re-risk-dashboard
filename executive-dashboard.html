@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Real Estate Risk Executive Dashboard</title>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            height: 100vh; 
+            font-family: Arial, sans-serif;
+        }
+        /* Tailwind-like utility classes */
+        .bg-white { background-color: white; }
+        .p-6 { padding: 24px; }
+        .rounded-lg { border-radius: 8px; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .border { border: 1px solid; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-b { border-bottom: 1px solid; }
+        .pb-4 { padding-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .font-bold { font-weight: 700; }
+        .text-gray-800 { color: #1f2937; }
+        .text-gray-600 { color: #4b5563; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .text-xl { font-size: 1.25rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .overflow-hidden { overflow: hidden; }
+        .min-w-full { min-width: 100%; }
+        .divide-y { border-top-width: 1px; border-bottom-width: 1px; }
+        .divide-gray-200 { border-color: #e5e7eb; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .text-left { text-align: left; }
+        .text-xs { font-size: 0.75rem; }
+        .font-medium { font-weight: 500; }
+        .text-gray-500 { color: #6b7280; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-wider { letter-spacing: 0.05em; }
+        .whitespace-nowrap { white-space: nowrap; }
+        .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+        .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+        .rounded-full { border-radius: 9999px; }
+        .text-white { color: white; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-orange-500 { background-color: #f97316; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .text-sm { font-size: 0.875rem; }
+        .text-gray-900 { color: #111827; }
+        .block { display: block; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .gap-6 { gap: 1.5rem; }
+        .bg-red-50 { background-color: #fef2f2; }
+        .border-red-200 { border-color: #fecaca; }
+        .text-red-700 { color: #b91c1c; }
+        .pb-4 { padding-bottom: 1rem; }
+        .border-red-200 { border-color: #fecaca; }
+        .mt-1 { margin-top: 0.25rem; }
+        .text-gray-700 { color: #374151; }
+        .bg-green-50 { background-color: #f0fdf4; }
+        .border-green-200 { border-color: #bbf7d0; }
+        .text-green-700 { color: #15803d; }
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .bg-green-100 { background-color: #dcfce7; }
+        .text-green-800 { color: #166534; }
+        .bg-red-100 { background-color: #fee2e2; }
+        .text-red-800 { color: #991b1b; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .border-blue-200 { border-color: #bfdbfe; }
+        .text-lg { font-size: 1.125rem; }
+        .text-blue-800 { color: #1e40af; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .h-6 { height: 1.5rem; }
+        .w-6 { width: 1.5rem; }
+        .text-blue-600 { color: #2563eb; }
+        .ml-3 { margin-left: 0.75rem; }
+        
+        /* Media query for md screens */
+        @media (min-width: 768px) {
+            .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root" style="width: 100%; height: 100%;"></div>
+    
+    <script type="text/babel">
+        const ExecutiveDashboard = () => {
+          // Top level market risk summary data
+          const marketSummary = [
+            { 
+              category: "High Risk",
+              markets: ["Los Angeles, CA", "Austin, TX", "San Francisco, CA"],
+              keyDrivers: "Climate risk, cost trajectories, market liquidity",
+              investmentStrategy: "Extreme caution; focus on properties with 20%+ discounts to peak prices",
+              priceOutlook: "Potential 6-10% correction in next 12-18 months"
+            },
+            { 
+              category: "Moderate Risk",
+              markets: ["Denver, CO", "Dallas, TX", "Miami, FL", "New York, NY", "Atlanta, GA", "Boston, MA"],
+              keyDrivers: "Mixed factors with offsetting strengths and weaknesses",
+              investmentStrategy: "Selective opportunities in submarkets with lower cost trajectory risk",
+              priceOutlook: "Flat to moderate growth with neighborhood-level variation"
+            },
+            { 
+              category: "Low Risk",
+              markets: ["Chicago, IL"],
+              keyDrivers: "Favorable climate outlook, stable costs, reasonable affordability",
+              investmentStrategy: "Strong value acquisition opportunities, especially in revitalizing areas",
+              priceOutlook: "Steady 3-5% annual appreciation likely"
+            }
+          ];
+
+          // Critical warning signals data
+          const warningSignals = [
+            {
+              signal: "Extreme Reality Gap",
+              markets: ["Austin (15%)", "Los Angeles (14%)", "San Francisco (13%)"],
+              interpretation: "Significant disparity between seller expectations and buyer willingness to pay",
+              actionItem: "Negotiate aggressively on price or delay acquisitions"
+            },
+            {
+              signal: "Insurance Premium Spike",
+              markets: ["San Francisco (13.5%)", "Los Angeles (12.0%)", "Austin (10.5%)"],
+              interpretation: "Climate risks and construction costs driving ownership expense increases",
+              actionItem: "Factor in 5-year total cost of ownership, not just purchase price"
+            },
+            {
+              signal: "Market Liquidity Deterioration",
+              markets: ["Austin (100/100)", "Boston (72/100)", "Dallas (66/100)"],
+              interpretation: "Extended days-on-market and rising inventory suggest buyer hesitation",
+              actionItem: "Plan for longer hold periods and more difficult exit strategies"
+            }
+          ];
+
+          // Undervalued opportunities
+          const opportunityMarkets = [
+            {
+              market: "Chicago, IL",
+              riskScore: 29,
+              uniqueAdvantage: "Lowest climate risk exposure (19/100) combined with steady job growth",
+              recommendation: "Focus on north and northwest neighborhoods with improving infrastructure"
+            },
+            {
+              market: "Atlanta, GA",
+              riskScore: 36,
+              uniqueAdvantage: "Exceptional cost trajectory stability (10/100) with strong population growth",
+              recommendation: "Target emerging corridors with new transit development"
+            },
+            {
+              market: "Boston, MA",
+              riskScore: 35,
+              uniqueAdvantage: "Best-in-class cost trajectory risk (0/100) offsets high market liquidity concerns",
+              recommendation: "Focus on properties within 10-15 minutes of major employment centers"
+            }
+          ];
+
+          // Q2 2025 outlook metrics to monitor
+          const metricsToWatch = [
+            {
+              metric: "Interest Rate Changes",
+              warningThreshold: "50+ basis point increase",
+              opportunityThreshold: "25+ basis point decrease",
+              rationale: "Even small rate changes significantly impact affordability in high-price markets"
+            },
+            {
+              metric: "New Construction Pipeline",
+              warningThreshold: "10%+ year-over-year increase in permits",
+              opportunityThreshold: "10%+ year-over-year decrease in permits",
+              rationale: "Supply changes typically impact prices 12-18 months after permitting changes"
+            },
+            {
+              metric: "Days-on-Market Trend",
+              warningThreshold: "15%+ increase in average days-on-market",
+              opportunityThreshold: "15%+ decrease in average days-on-market",
+              rationale: "Early indicator of shifting market sentiment before price changes materialize"
+            }
+          ];
+
+          // Color coding helpers
+          const getCategoryColor = (category) => {
+            switch (category) {
+              case "High Risk": return "bg-red-600";
+              case "Moderate Risk": return "bg-orange-500";
+              case "Low Risk": return "bg-green-600";
+              default: return "bg-blue-500";
+            }
+          };
+
+          return (
+            <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+              <div className="border-b pb-4 mb-6">
+                <h1 className="text-3xl font-bold text-gray-800">2025 Real Estate Risk Executive Dashboard</h1>
+                <p className="text-gray-600 mt-2">Comprehensive analysis of housing market risks, opportunities, and actionable insights</p>
+              </div>
+              
+              {/* Market Risk Tiers */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Market Risk Tiers</h2>
+                <div className="overflow-hidden border border-gray-200 rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Category</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Markets</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key Risk Drivers</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Investment Strategy</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price Outlook</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {marketSummary.map((tier, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getCategoryColor(tier.category)}`}>
+                              {tier.category}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              {tier.markets.map((market, i) => (
+                                <span key={i} className="block">{market}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{tier.keyDrivers}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{tier.investmentStrategy}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{tier.priceOutlook}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Critical Warning Signals */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">Critical Warning Signals</h2>
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    {warningSignals.map((signal, index) => (
+                      <div key={index} className={index !== warningSignals.length - 1 ? "mb-4 pb-4 border-b border-red-200" : ""}>
+                        <h3 className="font-semibold text-red-700">{signal.signal}</h3>
+                        <p className="text-sm mt-1"><span className="font-medium">Markets:</span> {signal.markets.join(", ")}</p>
+                        <p className="text-sm mt-1 text-gray-700">{signal.interpretation}</p>
+                        <p className="text-sm mt-1 font-medium text-red-700">Action: {signal.actionItem}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Undervalued Opportunity Markets */}
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">Undervalued Opportunity Markets</h2>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    {opportunityMarkets.map((market, index) => (
+                      <div key={index} className={index !== opportunityMarkets.length - 1 ? "mb-4 pb-4 border-b border-green-200" : ""}>
+                        <div className="flex justify-between">
+                          <h3 className="font-semibold text-green-700">{market.market}</h3>
+                          <span className="text-sm bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full">Risk Score: {market.riskScore}/100</span>
+                        </div>
+                        <p className="text-sm mt-1 text-gray-700">{market.uniqueAdvantage}</p>
+                        <p className="text-sm mt-1 font-medium text-green-700">Recommendation: {market.recommendation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Q2 2025 Metrics to Watch */}
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Q2 2025 Metrics to Watch</h2>
+                <div className="overflow-hidden border border-gray-200 rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key Metric</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Warning Threshold</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Opportunity Threshold</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rationale</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {metricsToWatch.map((metric, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{metric.metric}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              {metric.warningThreshold}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              {metric.opportunityThreshold}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{metric.rationale}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Premium Subscriber Value Proposition */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
+                <h2 className="text-lg font-bold text-blue-800 mb-2">Premium Subscriber Benefits</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-gray-700">Monthly risk score updates with email alerts when markets cross critical thresholds</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-gray-700">Neighborhood-level Risk Explorer tool for granular investment targeting</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-gray-700">Quarterly webinar with our Chief Economist analyzing emerging market trends</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+        
+        ReactDOM.render(<ExecutiveDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
